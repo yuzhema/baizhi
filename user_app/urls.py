@@ -19,5 +19,5 @@ urlpatterns = [
                             path('logic/',views.login_logic,name='logic')],'login'))),
     path('register/',include(([path('page/',views.register_page,name='page'),
                                path('logic/',views.register_logic,name='logic')],'register'))),
-    path('hbase/',views.test_hbase,name='hbase')
+
 ]

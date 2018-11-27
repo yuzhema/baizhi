@@ -34,7 +34,7 @@
                             </select>
 							<input type="text" id="fyZldz" name="fangyuanEntity.fyZldz" class="ui_input_txt02" />
 							<input type="button" value="查询" class="ui_input_btn01" onclick="search();" />
-
+                            
 
 
 						</div>
@@ -109,14 +109,18 @@
 	</form>
     <script src="/static/js/jquery.js"></script>
     <script>
+{#        $(".ui_input_btn01").click(function () {#}
+{#            location.href="{% url 'main:ms' %}?num=1&val={{ val }}&selec={{ selec }}"#}
+{#        })#}
+
         function shang() {
             {% if page.has_previous %}
-                location.href="{% url 'main:ms' %}?num="+{{ page.previous_page_number }}+"&ID="+{{ ID }}+'&val={{ val }}&selec={{ selec }}'
+                location.href="{% url 'main:ms' %}?num={{ page.previous_page_number }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
             {% endif %}
         }
         function xia() {
             {% if page.has_next %}
-                location.href="{% url 'main:ms' %}?num="+{{ page.next_page_number }}+"&ID="+{{ ID }}+'&val={{ val }}&selec={{ selec }}'
+                location.href="{% url 'main:ms' %}?num={{ page.next_page_number }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
             {% endif %}
         }
 

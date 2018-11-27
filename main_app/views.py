@@ -47,16 +47,18 @@ def ms(request):
             request.session['labal'] = 50
             num=50
         request.session['labal'] = int(labal) + 1
-
-
+    print(val)
+    print(selec)
+    print('ID',ID,'num',num)
     #判断是不是从搜索条件处转来的
-    if val and selec:
-        print('val',val,'selec',selec)
+    if val and selec and val!='None' and selec!='None':
+
         if selec=='1':
             data=Projects.objects.filter(city__contains=val)
         else:
             data=Projects.objects.filter(title__contains=val)
     else:
+        print('aaaaaaaaaaaaaaaaaaaaaa')
         if ID=='1':
             data=Projects.objects.filter(city__contains='北京',title__icontains='web')
             print(data)

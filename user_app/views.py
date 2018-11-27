@@ -37,16 +37,16 @@ def register_logic(request):
     except:
         return redirect('user:register:page')
 
-import happybase
-connection=happybase.Connection(host='192.168.245.36',port=9090)
-connection.open()
-
-def test_hbase(request):
-    table = connection.table('t_projects:aa')
-    # table.put('002',{'choosed:name':'xiaohei','choosed:sex':'male','refused:salary':'2000'})
-
-    info = table.scan()
-    return render(request,'hbase.html',{'info':info})
+# import happybase
+# connection=happybase.Connection(host='192.168.245.36',port=9090)
+# connection.open()
+#
+# def test_hbase(request):
+#     table = connection.table('t_projects:aa')
+#     # table.put('002',{'choosed:name':'xiaohei','choosed:sex':'male','refused:salary':'2000'})
+#
+#     info = table.scan()
+#     return render(request,'hbase.html',{'info':info})
 
 
 
