@@ -9,12 +9,14 @@ def login_page(request):
     return render(request,'user_app/login.html')
 
 def login_logic(request):
+
     user=request.POST.get('userid')
     pwd=request.POST.get('pwd')
 
     check=Baizhi.objects.filter(user=user,pwd=pwd)
     if check:
         request.session['labal']=1
+        request.session['username'] = user
         return redirect('main:display')
     return redirect('user:login:page')
 
@@ -25,6 +27,7 @@ def register_page(request):
 
 
 def register_logic(request):
+
     user=request.POST.get('userid')
     usertel=request.POST.get('usertel')
     email=request.POST.get('email')
@@ -33,6 +36,7 @@ def register_logic(request):
     try:
         Baizhi(user=user,usertel=usertel,email=email,pwd=pwd).save()
         request.session['labal']='1'
+        request.session['username'] = user
         return redirect('main:display')
     except:
         return redirect('user:register:page')
@@ -47,6 +51,28 @@ def register_logic(request):
 #
 #     info = table.scan()
 #     return render(request,'hbase.html',{'info':info})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
