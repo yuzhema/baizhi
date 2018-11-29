@@ -1,4 +1,6 @@
 import os,random,string,time,happybase,requests
+
+from django.views.decorators.cache import cache_page
 from lxml import etree
 
 from django.core.paginator import Paginator
@@ -8,12 +10,11 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from main_app.models import Projects
 from main_app.tools.image import ImageCaptcha
-
+from . daily import logs
 import happybase
 connection=happybase.Connection(host='172.16.14.84',port=9090)
 connection.open()
 table=connection.table('AI133:t_project')
-info=table.scan(columns=('choosed',))
 
 
 
@@ -28,71 +29,151 @@ def intro(request):
     return render(request,'main_app/introduce.html')
 
 
-#通过ip地址查询用户所在地
-def ip_address(ip):
-    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.62 Safari/537.36'}
-    html=requests.post('http://ip.tool.chinaz.com/{}'.format(ip),headers=headers).text
-    labal=etree.HTML(html)
-    address=labal.xpath('//p[@class="WhwtdWrap bor-b1s col-gray03"]/span/text()')[-1]
-    return address
 
-#插件，日志
-def logs(fun):
-    def cha(args):
-        t=time.localtime()
-        years=t.tm_year
-        month=t.tm_mon
-        day=t.tm_mday
-        hours=t.tm_hour
-        minute=t.tm_min
-        visit_time=str(years)+'-'+str(month)+'-'+str(day)+' '+str(hours)+':'+str(minute)
-        ID=args.GET.get('ID')
-        username=args.session.get('username')
-        ip=args.META['HTTP_HOST']
-        address=ip_address(ip)
-        if ID:
-            if 1<=int(ID)<=4:
-                city='北京'
-            elif 6<int(ID)<9:
-                city='上海'
-            elif 9<=int(ID)<13:
-                city='广州'
-            else:
-                city='深圳'
-            if ID in ['1', '5', '9', '13']:
-                jobs='python web'
-            elif ID in ['2','6','10','14']:
-                jobs='爬虫'
-            elif ID in ['3','7','11','15']:
-                jobs='大数据'
-            else:
-                jobs='AI'
-        else:
-            ID=''
-            jobs=''
-        if not username:
-            username=ip
-        connection = happybase.Connection(host='172.16.14.84', port=9090)
-        connection.open()
-        table = connection.table('AI133:journal_file')
-        table.put(str(time.time()),{'daily:username':username,'daily:address':address,'daily:visit_time':visit_time,'daily:jobs':jobs,'daily:city':city})
-        return fun(args)
+#封装的左边栏方法
+def datas(ID):
+    if ID == '1':
+        data = Projects.objects.filter(city__contains='北京', title__icontains='web')
 
-    return cha
+    elif ID == '2':
+        data = Projects.objects.filter(city__contains='北京', title__contains='爬')
+    elif ID == '3':
+        data = Projects.objects.filter(city__contains='北京', title__contains='数据')
+    elif ID == '4':
+        data = Projects.objects.filter(city__contains='北京', title__icontains='ai')
+    elif ID == '5':
+        data = Projects.objects.filter(city__contains='上海', title__icontains='web')
+    elif ID == '6':
+        data = Projects.objects.filter(city__contains='上海', title__contains='爬')
+    elif ID == '7':
+        data = Projects.objects.filter(city__contains='上海', title__contains='数据')
+    elif ID == '8':
+        data = Projects.objects.filter(city__contains='上海', title__icontains='ai')
+    elif ID == '9':
+        data = Projects.objects.filter(city__contains='广州', title__icontains='web')
+    elif ID == '10':
+        data = Projects.objects.filter(city__contains='广州', title__contains='爬')
+    elif ID == '11':
+        data = Projects.objects.filter(city__contains='广州', title__contains='数据')
+    elif ID == '12':
+        data = Projects.objects.filter(city__contains='广州', title__icontains='ai')
+    elif ID == '13':
+        data = Projects.objects.filter(city__contains='深圳', title__icontains='web')
+    elif ID == '14':
+        data = Projects.objects.filter(city__contains='深圳', title__contains='爬')
+    elif ID == '15':
+        data = Projects.objects.filter(city__contains='深圳', title__contains='数据')
+    elif ID == '16':
+        data = Projects.objects.filter(city__contains='深圳', title__icontains='ai')
+    return data
 
+#hbase过滤封装的函数
+def cover_hbase(ID):
+    if ID=='1':
+        filters="RowFilter(=,'regexstring:.*?(web|python|Python|WEB|Web|后台|全栈).*?北京.*')"
+    elif ID=='2':
+        filters="RowFilter(=,'regexstring:.*?(爬虫|搜索).*?北京.*')"
+    elif ID=='3':
+        filters="RowFilter(=,'regexstring:.*?(大数据|算法).*?北京.*')"
+    elif ID=='4':
+        filters="RowFilter(=,'regexstring:.*?(ai|AI|智能).*?北京.*')"
+    elif ID=='5':
+        filters="RowFilter(=,'regexstring:.*?(web|python|Python|WEB|Web|后台|全栈).*?上海.*')"
+    elif ID=='6':
+        filters="RowFilter(=,'regexstring:.*?(爬虫|搜索).*?上海.*')"
+    elif ID=='7':
+        filters="RowFilter(=,'regexstring:.*?(大数据|算法).*?上海.*')"
+    elif ID=='8':
+        filters="RowFilter(=,'regexstring:.*?(ai|AI|智能).*?上海.*')"
+    elif ID=='9':
+        filters="RowFilter(=,'regexstring:.*?(web|python|Python|WEB|Web|后台|全栈).*?广州.*')"
+    elif ID=='10':
+        filters="RowFilter(=,'regexstring:.*?(爬虫|搜索).*?广州.*')"
+    elif ID=='11':
+        filters="RowFilter(=,'regexstring:.*?(大数据|算法).*?广州.*')"
+    elif ID=='12':
+        filters="RowFilter(=,'regexstring:.*?(ai|AI|智能).*?广州.*')"
+    elif ID=='13':
+        filters="RowFilter(=,'regexstring:.*?(web|python|Python|WEB|Web|后台|全栈).*?深圳.*')"
+    elif ID=='14':
+        filters="RowFilter(=,'regexstring:.*?(爬虫|搜索).*?上海.*')"
+    elif ID=='15':
+        filters="RowFilter(=,'regexstring:.*?(大数据|算法).*?上海.*')"
+    elif ID=='16':
+        filters="RowFilter(=,'regexstring:.*?(ai|AI|智能).*?上海.*')"
+    info=table.scan(columns=('choosed',),filter=filters)
+    return info
+
+#搜索
+def hbase_search(val):
+    info = table.scan(filter="RowFilter(=,'regexstring:.*?{}.*')".format(val), columns=('choosed',))
+    return info
+
+#hbase中获取数据
+def get_hbase(num,number,sum_num,ID=None,val=None):
+    l=[]
+
+    if val:
+        info=hbase_search(val)
+    else:
+        info=cover_hbase(ID)
+
+    if num==sum_num:
+
+        for i in list(info)[:10-number]:
+            d = {}
+            for j,k in i[1].items():
+                d.update({j.decode().split(':')[1]:k.decode()})
+            print(d)
+            l.append(d)
+
+    else:
+
+        for i in list(info)[(num-sum_num)*10+10-number:(num-sum_num+1)*10+10-number]:
+            d = {}
+            for j,k in i[1].items():
+                d.update({j.decode().split(':')[1]:k.decode()})
+            print(d)
+            l.append(d)
+
+
+    return l
+
+# @cache_page(timeout=60,key_prefix="cacheRedis")    # timeout 缓存时效(秒)
 @logs
 def ms(request):
     #左边栏点击的是哪个
     ID=request.GET.get('ID')
+    num=request.GET.get('num')
+    del_num=request.GET.get('del_num')
+    nums=request.GET.get('nums')
+    v=request.GET.get('v')
     #搜索框传来的数据
     val=request.GET.get('val')
     selec=request.GET.get('selec')
+
+    #判断是否是爬虫
     if "Mozilla/5.0" not in request.META['HTTP_USER_AGENT']:
         return render(request,'main_app/404.html')
     num = request.GET.get('num')
     labal=request.session.get('labal')
-    if not num:
+    #判断点击的是不是下一页
+    if num:
+        num=int(num)+1
+    if (not num and not del_num) or del_num=='1':
+
         num=1
+
+    #判断是不是点击的是上一页，以及当前页是否为1
+    if del_num and int(del_num)>1:
+
+        num=int(del_num)-1
+    if nums:
+        if 0>int(float(nums)) or int(nums)>int(v):
+            num=1
+        else:
+            num=int(nums)
+    #判断是否登录
     if not labal:
         if int(num)>10:
             num=1
@@ -107,53 +188,61 @@ def ms(request):
 
         if selec=='1':
             data=Projects.objects.filter(city__contains=val)
+
         else:
             data=Projects.objects.filter(title__contains=val)
+        hbase_num=len(list(hbase_search(val)))
     else:
-        # 从hbase中获取数据
-        if int(num)>5:
-            for i in list(info)[(int(num) - 6) * 20:(int(num) - 5) * 20]:
-                for j, k in i[1].items():
-                    d.update({j.decode().split(':')[1]: k.decode()})
-                l.append(d)
-            return render(request, 'main_app/menu.html', {'l': l})
 
-        if ID=='1':
-            data=Projects.objects.filter(city__contains='北京',title__icontains='web')
+        data=datas(ID)
+        # hbase中数据的数量
+        hbase_num = len(list(cover_hbase(ID)))
+    #从hbase中获取数据
+    l=[]
+    page=None
+    p = Paginator(object_list=data, per_page=10)
+    #mysql中的总页数
+    sum_num=p.page(1).paginator.num_pages
 
-        elif ID=='2':
-            data = Projects.objects.filter(city__contains='北京', title__contains='爬')
-        elif ID == '3':
-            data = Projects.objects.filter(city__contains='北京', title__contains='数据')
-        elif ID == '4':
-            data = Projects.objects.filter(city__contains='北京', title__icontains='ai')
-        elif ID == '5':
-            data = Projects.objects.filter(city__contains='上海', title__icontains='web')
-        elif ID == '6':
-            data = Projects.objects.filter(city__contains='上海', title__contains='爬')
-        elif ID == '7':
-            data = Projects.objects.filter(city__contains='上海', title__contains='数据')
-        elif ID == '8':
-            data = Projects.objects.filter(city__contains='上海', title__icontains='ai')
-        elif ID == '9':
-            data = Projects.objects.filter(city__contains='广州', title__icontains='web')
-        elif ID == '10':
-            data = Projects.objects.filter(city__contains='广州', title__contains='爬')
-        elif ID == '11':
-            data = Projects.objects.filter(city__contains='广州', title__contains='数据')
-        elif ID == '12':
-            data = Projects.objects.filter(city__contains='广州', title__icontains='ai')
-        elif ID == '13':
-            data = Projects.objects.filter(city__contains='深圳', title__icontains='web')
-        elif ID == '14':
-            data = Projects.objects.filter(city__contains='深圳', title__contains='爬')
-        elif ID == '15':
-            data = Projects.objects.filter(city__contains='深圳', title__contains='数据')
-        elif ID == '16':
-            data = Projects.objects.filter(city__contains='深圳', title__icontains='ai')
-    page = Paginator(object_list=data, per_page=20).page(int(num))
 
-    return render(request,'main_app/menu.html',{'page':page,'data':data,"ID":ID,'val':val,'selec':selec})
+    print(hbase_num)
+    #mysql中存储的数量
+    mysql_num=len(list(data))
+    #hbase和mysql中的总数量
+    sum_hbase_mysql=hbase_num+mysql_num
+
+    # mysql中最后一页的数量
+    number =mysql_num -(sum_num-1)*10
+
+    # 判断是不是从搜索条件处转来的
+
+    if val and selec and val != 'None' and selec != 'None':
+
+        if num<sum_num:
+            page=p.page(num)
+        elif num==sum_num:
+            page=p.page(num)
+            l=get_hbase(num,number,sum_num,val)
+        else:
+            l = get_hbase(num, number, sum_num, val)
+    else:
+
+        if num<sum_num:
+            page=p.page(num)
+        elif num==sum_num:
+            page=p.page(num)
+
+            #hbase中获取的第一页数据
+            l=get_hbase(num,number,sum_num,ID=ID)
+
+        else:
+            l = get_hbase(num, number, sum_num,ID=ID)
+
+    print(l)
+    return render(request,'main_app/menu.html',{'page':page,'data':data,"ID":ID,'val':val,'selec':selec,'num':num,'del_num':num,'l':l,'number':number,'sum_hbase_mysql':sum_hbase_mysql})
+
+
+
 
 
 

@@ -57,10 +57,9 @@
 							<th>公司地点</th>
 
 						</tr>
-
-                        {% for i in page.object_list %}
+                        {% if num <= number %}
+                            {% for i in page.object_list %}
 							<tr>
-
 								<td>{{ i.title }}</td>
 								<td>{{ i.company }}</td>
 								<td>{{ i.salary }}</td>
@@ -68,20 +67,51 @@
 								<td>{{ i.experience }}</td>
 								<td>{{ i.academics }}</td>
 								<td>{{ i.city }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% for j in l %}
+                                <tr>
+
+                                    <td>{{ j.title }}</td>
+                                    <td>{{ j.company }}</td>
+                                    <td>{{ j.salary }}</td>
+                                    <td>{{ j.describes }}</td>
+                                    <td>{{ j.experience }}</td>
+                                    <td>{{ j.academics }}</td>
+                                    <td>{{ j.city }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for j in l %}
+                                <tr>
+
+                                    <td>{{ j.title }}</td>
+                                    <td>{{ j.company }}</td>
+                                    <td>{{ j.salary }}</td>
+                                    <td>{{ j.describes }}</td>
+                                    <td>{{ j.experience }}</td>
+                                    <td>{{ j.academics }}</td>
+                                    <td>{{ j.city }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
 
 
-							</tr>
-		                {% endfor %}
+
+
+
+
+
 					</table>
 				</div>
 				<div class="ui_tb_h30">
 					<div class="ui_flt" style="height: 30px; line-height: 30px;">
 						共有
-						<span class="ui_txt_bold04">{{ data.count }}</span>
+						<span class="ui_txt_bold04">{{ sum_hbase_mysql }}</span>
 						条记录，当前第
-						<span class="ui_txt_bold04">{{ page.number }}
+						<span class="ui_txt_bold04">{{ num }}
 						/
-						{{ page.paginator.num_pages }}</span>
+						{% widthratio sum_hbase_mysql 10 1 %}</span>
 						页
 					</div>
 					<div class="ui_frt">
@@ -92,16 +122,16 @@
 							<input type="button" value="下一页" class="ui_input_btn01"
 								onclick="xia()" />
 							<input type="button" value="尾页" class="ui_input_btn01"
-								onclick="jumpNormalPage(9);" />
+								onclick="wei()" />
 							<!--     如果是最后一页，则只显示首页、上一页 -->
 						
 						转到第<input type="text" id="jumpNumTxt" class="ui_input_txt01" />页
-							 <input type="button" class="ui_input_btn01" value="跳转" onclick="jumpInputPage(9);" />
+							 <input type="button" class="ui_input_btn01" value="跳转" onclick="tiao()" />
 					</div>
 				</div>
 			</div>
 		</div>
-        <div style="border: 1px;width: 162px;background-color:#edf5f8;position:relative;left:164px;top:-1288px;margin:0;padding:0">
+        <div style="border: 1px;width: 162px;background-color:#edf5f8;position:fixed;left:164px;top:84px;margin:0;padding:0">
             <table id="tt" width="162px">
 
             </table>
@@ -114,15 +144,31 @@
 {#        })#}
 
         function shang() {
-            {% if page.has_previous %}
-                location.href="{% url 'main:ms' %}?num={{ page.previous_page_number }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
+            {% if num > 1 %}
+                location.href="{% url 'main:ms' %}?del_num={{ num }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
             {% endif %}
+
+{#            location.href="{% url 'main:ms' %}?del_num={{ num }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"#}
+
+
         }
         function xia() {
-            {% if page.has_next %}
-                location.href="{% url 'main:ms' %}?num={{ page.next_page_number }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
+            {% if num < sum_hbase_mysql %}
+                location.href="{% url 'main:ms' %}?num={{ num }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"
             {% endif %}
+{#            location.href="{% url 'main:ms' %}?num={{ num }}&ID={{ ID }}&val={{ val }}&selec={{ selec }}"#}
+
         }
+
+        function wei() {
+            location.href="{% url 'main:ms' %}?nums={% widthratio sum_hbase_mysql 10 1 %}&ID={{ ID }}&val={{ val }}&selec={{ selec }}&v={% widthratio sum_hbase_mysql 10 1 %}"
+        }
+
+        function tiao() {
+            var v=$("#jumpNumTxt").val()
+            location.href="{% url 'main:ms' %}?v={% widthratio sum_hbase_mysql 10 1 %}&ID={{ ID }}&val={{ val }}&selec={{ selec }}&nums="+v
+        }
+
 
         //异步搜索，模糊查询
 
