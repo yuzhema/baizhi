@@ -10,7 +10,7 @@ from main_app.models import Projects
 from main_app.tools.image import ImageCaptcha
 
 import happybase
-connection=happybase.Connection(host='192.168.245.36',port=9090)
+connection=happybase.Connection(host='172.16.14.84',port=9090)
 connection.open()
 table=connection.table('AI133:t_project')
 info=table.scan(columns=('choosed',))
@@ -53,7 +53,7 @@ def logs(fun):
         if ID:
             if 1<=int(ID)<=4:
                 city='北京'
-            elif 3<int(ID)<9:
+            elif 6<int(ID)<9:
                 city='上海'
             elif 9<=int(ID)<13:
                 city='广州'
@@ -72,10 +72,10 @@ def logs(fun):
             jobs=''
         if not username:
             username=ip
-        connection = happybase.Connection(host='192.168.245.36', port=9090)
+        connection = happybase.Connection(host='172.16.14.84', port=9090)
         connection.open()
         table = connection.table('AI133:journal_file')
-        table.put(int(time.time()),{'daily:username':username,'daily:address':address,'daily:visit_time':visit_time,'daily:jobs':jobs})
+        table.put(str(time.time()),{'daily:username':username,'daily:address':address,'daily:visit_time':visit_time,'daily:jobs':jobs,'daily:city':city})
         return fun(args)
 
     return cha
@@ -84,15 +84,10 @@ def logs(fun):
 def ms(request):
     #左边栏点击的是哪个
     ID=request.GET.get('ID')
-
-
     #搜索框传来的数据
     val=request.GET.get('val')
     selec=request.GET.get('selec')
-
-
     if "Mozilla/5.0" not in request.META['HTTP_USER_AGENT']:
-
         return render(request,'main_app/404.html')
     num = request.GET.get('num')
     labal=request.session.get('labal')
@@ -102,18 +97,10 @@ def ms(request):
         if int(num)>10:
             num=1
     else:
-
         if int(labal)>100:
             request.session['labal'] = 50
             num=50
         request.session['labal'] = int(labal) + 1
-
-
-
-    l=[]
-    d={}
-
-
 
     #判断是不是从搜索条件处转来的
     if val and selec and val!='None' and selec!='None':
@@ -124,12 +111,12 @@ def ms(request):
             data=Projects.objects.filter(title__contains=val)
     else:
         # 从hbase中获取数据
-        # if int(num) > 5:
-        #     for i in list(info)[(int(num) - 6) * 20:(int(num) - 5) * 20]:
-        #         for j, k in i[1].items():
-        #             d.update({j.decode().split(':')[1]: k.decode()})
-        #         l.append(d)
-        #     return render(request, 'main_app/menu.html', {'l': l})
+        if int(num)>5:
+            for i in list(info)[(int(num) - 6) * 20:(int(num) - 5) * 20]:
+                for j, k in i[1].items():
+                    d.update({j.decode().split(':')[1]: k.decode()})
+                l.append(d)
+            return render(request, 'main_app/menu.html', {'l': l})
 
         if ID=='1':
             data=Projects.objects.filter(city__contains='北京',title__icontains='web')
