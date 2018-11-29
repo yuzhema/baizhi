@@ -158,6 +158,10 @@ def ms(request):
     num=request.GET.get('num')
     del_num=request.GET.get('del_num')
     nums=request.GET.get('nums')
+    #时间标识
+    time1=request.session.get('time1')
+    #访问次数
+    count=request.session.get('count')
     v=request.GET.get('v')
     #搜索框传来的数据
     val=request.GET.get('val')
@@ -166,6 +170,22 @@ def ms(request):
     #判断是否是爬虫
     if "Mozilla/5.0" not in request.META['HTTP_USER_AGENT']:
         return render(request,'main_app/404.html')
+
+    if not time1:
+        time1=time.time()
+        count=1
+        request.session['count']=count
+        request.session['time1']=time1
+    else:
+        if int(count)>=8:
+            time2=time.time()
+            if time2-int(time1) <= 5:
+                time.sleep(5)
+
+            del request.session['time1']
+            del request.session['count']
+        else:
+            request.session['count']=int(count)+1
     num = request.GET.get('num')
     labal=request.session.get('labal')
     #判断点击的是不是下一页
@@ -187,11 +207,17 @@ def ms(request):
     #判断是否登录
     if not labal:
         if int(num)>10:
-            num=1
+            return redirect('user:login:page')
     else:
+<<<<<<< HEAD
         if int(labal)>100:
             request.session['labal']=50
             num=50
+=======
+        # if int(labal)>100:
+        #     request.session['labal'] = 50
+        #     num=50
+>>>>>>> 5f0285aa53fd072379cd1e242046ad17088f7ceb
         request.session['labal'] = int(labal) + 1
 
     #判断是不是从搜索条件处转来的
