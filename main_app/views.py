@@ -19,6 +19,11 @@ table=connection.table('AI133:t_project')
 
 
 def display(request):
+    '''
+
+    :param request:
+    :return: 展示页面
+    '''
     labal=request.session.get('labal')
 
     return render(request,'main_app/main.html')
@@ -29,9 +34,12 @@ def intro(request):
     return render(request,'main_app/introduce.html')
 
 
-
-#封装的左边栏方法
 def datas(ID):
+    '''
+    封装的左边栏方法，确定查询的城市，对应职位，
+    :param ID: 1-16分别对应四个城市的四个职位
+    :return:数据库查询结果
+    '''
     if ID == '1':
         data = Projects.objects.filter(city__contains='北京', title__icontains='web')
 
@@ -69,6 +77,10 @@ def datas(ID):
 
 #hbase过滤封装的函数
 def cover_hbase(ID):
+    '''
+    :param ID: 1-16分别对应四个城市的四个职位
+    :return:hbase查询结果
+    '''
     if ID=='1':
         filters="RowFilter(=,'regexstring:.*?(web|python|Python|WEB|Web|后台|全栈).*?北京.*')"
     elif ID=='2':
@@ -104,7 +116,7 @@ def cover_hbase(ID):
     info=table.scan(columns=('choosed',),filter=filters)
     return info
 
-#搜索
+#hbase搜索
 def hbase_search(val):
     info = table.scan(filter="RowFilter(=,'regexstring:.*?{}.*')".format(val), columns=('choosed',))
     return info
@@ -112,14 +124,13 @@ def hbase_search(val):
 #hbase中获取数据
 def get_hbase(num,number,sum_num,ID=None,val=None):
     l=[]
-
+    # 搜索
     if val:
         info=hbase_search(val)
+    #点击查询
     else:
         info=cover_hbase(ID)
-
     if num==sum_num:
-
         for i in list(info)[:10-number]:
             d = {}
             for j,k in i[1].items():
@@ -179,7 +190,7 @@ def ms(request):
             num=1
     else:
         if int(labal)>100:
-            request.session['labal'] = 50
+            request.session['labal']=50
             num=50
         request.session['labal'] = int(labal) + 1
 
@@ -238,13 +249,8 @@ def ms(request):
         else:
             l = get_hbase(num, number, sum_num,ID=ID)
 
-    print(l)
+    # print(l)
     return render(request,'main_app/menu.html',{'page':page,'data':data,"ID":ID,'val':val,'selec':selec,'num':num,'del_num':num,'l':l,'number':number,'sum_hbase_mysql':sum_hbase_mysql})
-
-
-
-
-
 
 def get_captcha(request):
     image=ImageCaptcha(fonts=[os.path.abspath('font/segoesc.ttf')])
@@ -265,13 +271,11 @@ def check_capt(request):
         return redirect('main:ms')
     return redirect('main:trance')
 
-
+#搜索框模糊查询，显示下拉框
 def key_up(request):
-
         val=request.GET.get('val')
         selec=request.GET.get('selec')
         rs=[]
-
         def myconverter(a):
             if isinstance(a,Projects):
                 return {"id":a.id,'title':a.title,'salary':a.salary,"academics":a.academics,'experience':a.experience,'company':a.company,'city':a.city,'describes':a.describes}
@@ -281,7 +285,6 @@ def key_up(request):
 
             return JsonResponse({'rs':list(result)},json_dumps_params={'default':myconverter})
         elif selec=='2':
-
             result=Projects.objects.filter(title__contains=val)[:5]
             return JsonResponse({'rs': list(result)}, json_dumps_params={'default': myconverter})
 
