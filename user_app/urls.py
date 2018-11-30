@@ -18,7 +18,9 @@ urlpatterns = [
     path('login/',include(([path('page/',views.login_page,name='page'),
                             path('logic/',views.login_logic,name='logic')],'login'))),
     path('register/',include(([path('page/',views.register_page,name='page'),
-                               path('logic/',views.register_logic,name='logic')],'register'))),
-    #邮箱验证
-
+                               path('logic/',views.register_logic,name='logic'),
+                               path("ajax_reg/", views.ajax_test1, name="ajaxreg"),
+                               path("show/", views.get_captcha, name="show"),
+                               path('confirm/',views.user_confirm,name="confirm"),
+                               path("checkcode/", views.checkcode, name="checkcode"),],'register'))),
 ]

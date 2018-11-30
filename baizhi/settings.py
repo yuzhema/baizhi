@@ -130,6 +130,11 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE=True  # session默认周期改为一个回话
 
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR,"static")]
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.sina.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'x719459355@sina.com'
+EMAIL_HOST_PASSWORD = 'xiong16617246963'
+CONFIRM_DAYS = 7
 
 
