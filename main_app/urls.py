@@ -15,10 +15,5 @@ urlpatterns = [
     path('display/',views.display,name='display'),
     path('intro/',views.intro,name='intro'),
     path('ms/',views.ms,name='ms'),
-    path('captcha/',views.get_captcha,name='captcha'),
-    path('trance/',views.trance_captcha,name='trance'),
-    path('check/',views.check_capt,name='check'),
     path('key_up/',views.key_up,name='key_up'),
-
-
 ]

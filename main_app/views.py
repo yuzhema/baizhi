@@ -209,15 +209,9 @@ def ms(request):
         if int(num)>10:
             return redirect('user:login:page')
     else:
-<<<<<<< HEAD
-        if int(labal)>100:
-            request.session['labal']=50
-            num=50
-=======
         # if int(labal)>100:
         #     request.session['labal'] = 50
         #     num=50
->>>>>>> 5f0285aa53fd072379cd1e242046ad17088f7ceb
         request.session['labal'] = int(labal) + 1
 
     #判断是不是从搜索条件处转来的
@@ -277,26 +271,6 @@ def ms(request):
 
     # print(l)
     return render(request,'main_app/menu.html',{'page':page,'data':data,"ID":ID,'val':val,'selec':selec,'num':num,'del_num':num,'l':l,'number':number,'sum_hbase_mysql':sum_hbase_mysql})
-
-def get_captcha(request):
-    image=ImageCaptcha(fonts=[os.path.abspath('font/segoesc.ttf')])
-    code_list=random.sample(string.ascii_lowercase+string.ascii_uppercase+string.digits,4)
-    code="".join(code_list)
-    request.session['code']=code
-    print(code)
-    data=image.generate(code)
-    return HttpResponse(data,'image/png')
-
-def trance_captcha(request):
-    return render(request,'main_app/captcha.html')
-
-def check_capt(request):
-    capt=request.GET.get('capt')
-    code=request.session.get('code')
-    if capt==code:
-        return redirect('main:ms')
-    return redirect('main:trance')
-
 #搜索框模糊查询，显示下拉框
 def key_up(request):
         val=request.GET.get('val')

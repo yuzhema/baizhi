@@ -18,6 +18,8 @@ except ImportError as err:
         'Error loading MySQLdb module.\n'
         'Did you install mysqlclient?'
     ) from err
+from sqlalchemy import pool
+Database = pool.manage(Database,pool_size=9, max_overflow=19, timeout=29)
 
 from MySQLdb.constants import CLIENT, FIELD_TYPE                # isort:skip
 from MySQLdb.converters import conversions                      # isort:skip
@@ -197,7 +199,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def get_connection_params(self):
         kwargs = {
-            'conv': django_conversions,
+            # 'conv': django_conversions,
             'charset': 'utf8',
         }
         settings_dict = self.settings_dict

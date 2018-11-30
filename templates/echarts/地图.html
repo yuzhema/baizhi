@@ -14,6 +14,9 @@ var chart = echarts.init(document.getElementById('main'));
 chart.setOption({
 
 	  tooltip: {},
+     visualMap: {
+        inRange: {color: ['#FF7F50', 'blue']}
+    },
     series: [{
 		name:'数量',
         type: 'map',

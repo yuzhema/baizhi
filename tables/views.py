@@ -53,4 +53,6 @@ def maps(request):
             city=value[b'daily:address'].decode()
             if city==city_list[i]:
                 city_count[i]+=1
+            if '本地'in city:
+                city_count[0]+=1
     return render(request,'echarts/地图.html',{'counts':city_count})
