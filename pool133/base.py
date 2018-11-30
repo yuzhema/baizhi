@@ -10,7 +10,6 @@ from django.db import utils
 from django.db.backends import utils as backend_utils
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.utils.functional import cached_property
-from sqlalchemy import pool
 
 try:
     import MySQLdb as Database
@@ -19,8 +18,6 @@ except ImportError as err:
         'Error loading MySQLdb module.\n'
         'Did you install mysqlclient?'
     ) from err
-
-Datebase=pool.manage(Database,pool_size=5,max_overflow=15,timeout=20)
 
 from MySQLdb.constants import CLIENT, FIELD_TYPE                # isort:skip
 from MySQLdb.converters import conversions                      # isort:skip
@@ -200,7 +197,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def get_connection_params(self):
         kwargs = {
-            # 'conv': django_conversions,
+            'conv': django_conversions,
             'charset': 'utf8',
         }
         settings_dict = self.settings_dict
