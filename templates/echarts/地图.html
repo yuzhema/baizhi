@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load cache %}
 <html>
 <head>
     <meta charset="utf-8">
@@ -11,6 +12,7 @@
 <script src="/static/js/china.js"></script>
 <script>
 var chart = echarts.init(document.getElementById('main'));
+{% cache 200 'cache_map' %}
 chart.setOption({
 
 	  tooltip: {},
@@ -59,6 +61,7 @@ chart.setOption({
             ]
      }]
 });
+{% endcache %}
 </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load cache %}
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -42,6 +43,7 @@
 				</div>
 			</div>
 
+
 			<div class="ui_content">
 				<div class="ui_tb">
 					<table class="table" cellspacing="0" cellpadding="0" width="100%" align="center" border="0">
@@ -57,6 +59,7 @@
 							<th>公司地点</th>
 
 						</tr>
+                         {% cache 200 'cache1' %}
                         {% if num <= number %}
                             {% for i in page.object_list %}
 							<tr>
@@ -95,13 +98,7 @@
                                 </tr>
                             {% endfor %}
                         {% endif %}
-
-
-
-
-
-
-
+                    {% endcache %}
 					</table>
 				</div>
 				<div class="ui_tb_h30">

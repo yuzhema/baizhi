@@ -93,12 +93,9 @@ def logs(fun):
                 jobs='大数据'
             else:
                 jobs='AI'
-        # else:
-        #     city=''
-        #     jobs=''
         if not username:
             username=ip
-        connection = happybase.Connection(host='172.16.14.84', port=9090)
+        connection = happybase.Connection(host='172.16.14.77', port=9090)
         connection.open()
         table = connection.table('AI133:journal_file')
         table.put(str(int(time.time())),{'daily:username':username,'daily:address':address,'daily:visit_time':visit_time,'daily:jobs':jobs,'daily:city':city})

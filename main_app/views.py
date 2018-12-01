@@ -12,15 +12,13 @@ from main_app.models import Projects
 from main_app.tools.image import ImageCaptcha
 from . daily import logs
 import happybase
-connection=happybase.Connection(host='172.16.14.84',port=9090)
+connection=happybase.Connection(host='172.16.14.77',port=9090)
 connection.open()
 table=connection.table('AI133:t_project')
-
-
-
+from redis import Redis
+red=Redis(host='172.16.14.77',port=6379)
 def display(request):
     '''
-
     :param request:
     :return: 展示页面
     '''
@@ -159,7 +157,7 @@ def ms(request):
     del_num=request.GET.get('del_num')
     nums=request.GET.get('nums')
     #时间标识
-    time1=request.session.get('time1')
+    # time1=request.session.get('time1')
     #访问次数
     count=request.session.get('count')
     v=request.GET.get('v')
@@ -170,22 +168,23 @@ def ms(request):
     #判断是否是爬虫
     if "Mozilla/5.0" not in request.META['HTTP_USER_AGENT']:
         return render(request,'main_app/404.html')
-
-    if not time1:
-        time1=time.time()
-        count=1
-        request.session['count']=count
-        request.session['time1']=time1
-    else:
-        if int(count)>=8:
-            time2=time.time()
-            if time2-int(time1) <= 5:
-                time.sleep(5)
-
-            del request.session['time1']
-            del request.session['count']
+    user_ip=request.META['HTTP_HOST']
+    redis_user_ip=red.get(user_ip)
+    redis_user_flag=red.get('user'+user_ip)
+    if not redis_user_flag:
+        if not redis_user_ip:
+            user_count1=1
+            red.set(user_ip,user_count1)
+            red.expire(user_ip,10)
         else:
-            request.session['count']=int(count)+1
+            user_count2=int(red.get(user_ip).decode())
+            if user_count2>20:
+                red.set('user'+user_ip,'exist')
+                red.expire('user'+user_ip,3600)
+            else:
+                red.set(user_ip,user_count2+1)
+    else:
+        return render(request, 'main_app/fm.html')
     num = request.GET.get('num')
     labal=request.session.get('labal')
     #判断点击的是不是下一页

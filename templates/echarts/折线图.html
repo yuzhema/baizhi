@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+{% load cache %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="/static/js/echarts.min.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1000px;height:600px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        {% cache 200 'cacheline' %}
+        // 指定图表的配置项和数据
+        var option = {
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    mark : {show: true},
+                    dataView : {show: true, readOnly: false},
+                    magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                    restore : {show: true},
+                    saveAsImage : {show: true}
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    boundaryGap : false,
+                    data : ['北京','上海','广州','深圳']
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'web',
+                    type:'line',
+                    stack: '总量',
+                    data:[{{count.0}},{{count.2}},{{count.8}},{{count.12}}]
+                },
+                {
+                    name:'爬虫',
+                    type:'line',
+                    stack: '总量',
+                    data:[{{count.1}},{{count.5}},{{count.9}},{{count.13}}]
+                },
+                {
+                    name:'大数据',
+                    type:'line',
+                    stack: '总量',
+                    data:[{{count.2}},{{count.6}},{{count.10}},{{count.14}}]
+                },
+                {
+                    name:'ai',
+                    type:'line',
+                    stack: '总量',
+                    data:[{{count.3}},{{count.7}},{{count.8}},{{count.15}}]
+                }
+
+            ]
+        };
+        {% endcache %}
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+</body>
+</html>

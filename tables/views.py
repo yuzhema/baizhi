@@ -1,11 +1,14 @@
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
+
 from main_app.models import Projects
 import happybase
 # Create your views here.
-connection=happybase.Connection(host='172.16.14.84',port=9090)
+connection=happybase.Connection(host='172.16.14.77',port=9090)
 connection.open()
 table=connection.table('AI133:t_project')
 #柱状图
+@cache_page(timeout=200,key_prefix="cacheRedis")
 def bars(request):
     #查询四大城市招聘数量
     beijing=Projects.objects.filter(city__contains='北京').count()
@@ -24,8 +27,9 @@ def bars(request):
         elif '深圳'in city:
             shenzhen+=1
     return render(request,"echarts/柱状图.html",{'beijing':beijing,'shanghai':shanghai,'guangzhou':guangzhou,'shenzhen':shenzhen})
+@cache_page(timeout=200,key_prefix="cacheRedis")
 def pie(request):
-    #查询四大城市招聘数量
+    #查询职位数量
     web=Projects.objects.filter(title__icontains='web').count()
     ai=Projects.objects.filter(title__icontains='ai').count()
     big_data=Projects.objects.filter(title__icontains='数据').count()
@@ -56,3 +60,8 @@ def maps(request):
             if '本地'in city:
                 city_count[0]+=1
     return render(request,'echarts/地图.html',{'counts':city_count})
+from .filter_base import hbase_list
+#折线图
+def lines(request):
+        count_list=hbase_list()
+        return render(request,'echarts/折线图.html',{'count':count_list})
