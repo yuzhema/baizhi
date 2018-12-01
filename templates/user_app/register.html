@@ -19,9 +19,13 @@
 <div class="log">
 	<div class="content2">
 		<h2>Register</h2>
+        {% load static %}
+        <div class="row">
+            <h1 class="text-center">{{ message }}</h1>
+        </div>
 		<form action="{% url 'user:register:logic' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-			<input type="text" name="userid" value="USERNAME" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'NAME AND SURNAME';}">
+			<input type="text" name="userid" value="USERNAME" id="user" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'NAME AND SURNAME';}"><img id="ret" height="21px" style="vertical-align: middle">
 			<input type="tel" name="usertel" value="PHONE" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'PHONE';}">
 			<input type="email" name="email" value="EMAIL ADDRESS" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'EMAIL ADDRESS';}">
 			<input type="password" name="pwd" value="PASSWORD" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'PASSWORD';}">
@@ -33,6 +37,36 @@
 <div class="footer">
 	<p>Copyright &copy;  <a href="http://www.baizhiedu.com/" target="_blank" title="百知教育">百知教育</a></p>
 </div>
+<script src="/static/js/jquery.js"></script>
+<script>
+
+
+$("#user").blur(function (){
+
+        console.log(1111111111);
+        var xhr = new XMLHttpRequest();
+
+    //初始化
+        user = $(this).val();
+        xhr.open("post","{% url 'user:register:ajaxreg' %}");
+        var token = "{{ csrf_token }}";
+        console.log("token:"+token);
+        xhr.setRequestHeader("X-CSRFToken",token);
+        xhr.setRequestHeader("content-type","application/x-www-form-urlencoded");
+        xhr.send("username="+user);
+        $("#ret").attr("src","{% static 'images/load.gif' %}");
+        xhr.onreadystatechange=function (){
+            if(xhr.readyState==4 && xhr.status == 200){
+                result = xhr.responseText;
+                if(result == "0"){
+                    $("#ret").attr("src",'{% static 'images/ok.gif' %}');
+                }else{
+                    $("#ret").attr("src",'{% static 'images/error.jpg' %}')
+                }
+            }
+        }
+    })
+</script>
 
 </body>
 </html>

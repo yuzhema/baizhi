@@ -9,13 +9,15 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from main_app.tools.image import ImageCaptcha
-from user_app.models import Baizhi
+from user_app.models import Baizhi, ConfirmString
 from django.core.mail import send_mail,EmailMultiAlternatives
 import datetime
 import hashlib
 from django.shortcuts import render
-from . import models
-from zhongji import settings
+
+from baizhi import settings
+
+
 
 
 
@@ -45,7 +47,7 @@ def hash_code(s,salt='oracle'):
 def make_confirm_string(user):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     code = hash_code(user.user, now)
-    models.ConfirmString.objects.create(code=code, user=user)
+    ConfirmString.objects.create(code=code, user=user)
 
     return code
 
@@ -63,7 +65,7 @@ def send_email(email, code):
 
 def ajax_test1(request):
     time.sleep(3)
-    user=request.POST.get("userid")
+    user=request.POST.get("username")
     print(user)
     # data = Baizhi.objects.filter(user=user)
     rule='.{1,10}'
@@ -83,12 +85,11 @@ def login_page(request):
 def login_logic(request):
     # 接受username和password
     realcode = request.session.get("code")
-    # 2.获取用户输入码
+    # 2.获取用户验证码
     usercode = request.POST.get("number")
     # 3.判断
 
     user = request.POST.get("userid")
-    # user1=models.Baizhi.objects.get(user=user)
     pwd = request.POST.get("pwd")
     print(user,pwd)
     salt=Baizhi.objects.filter(user=user)
@@ -100,22 +101,19 @@ def login_logic(request):
 
     # check = Baizhi.objects.filter(user=user)
     # print(check)
-    a=models.Baizhi.objects.get(user=user)
-    if pwd:
-        print(111111)
-        if not a.has_confirmed:
-            # a='1'
-            message = '没有进行邮箱确认，请前往邮箱进行确认'
-            # return render(request,'user_app/login.html',{a:"0"})
-            return HttpResponse("0")
-        else:
-            return HttpResponse("1")
-            # return render(request,'main_app/main.html', {a:"1"})
-    #     request.session['labal']=1
-    #     # return HttpResponse('1')
+    a=Baizhi.objects.get(user=user)
+    if pwd==a.pwd:
+        # print(111111)
+        # if not a.has_confirmed:
+        #     # a='1'
+        #     message = '没有进行邮箱确认，请前往邮箱进行确认'
+        #     # return render(request,'user_app/login.html',{a:"0"})
+        # return redirect('user:login:page')
+        # else:
+        request.session['labal'] = 1
+        return redirect('main:display')
     else:
-        return HttpResponse('0')
-
+        return redirect('user:login:page')
 
 def register_page(request):
 
@@ -127,14 +125,11 @@ def register_logic(request):
     usertel=request.POST.get('usertel')
     email=request.POST.get('email')
     pwd=request.POST.get('pwd')
-    # data = Baizhi.objects.filter(user=user)
-    # if data:
     result = makepwd(pwd)
     pwd = result[0]
-    new_user = Baizhi.objects.create(user=user, usertel=usertel, email=email, pwd=pwd)
-    print(user, usertel, email, pwd)
-# print(data)
-# print(user,usertel,email,pwd)
+    salt = result[1]
+    new_user = Baizhi.objects.create(user=user, usertel=usertel, email=email, pwd=pwd,salt=salt)
+    print(user, usertel, email, pwd,salt)
     code = make_confirm_string(new_user)
     print(code)
     send_email(email, code)
@@ -145,7 +140,7 @@ def user_confirm(request):
     code=request.GET.get('code',None)
     message=''
     try:
-        confirm = models.ConfirmString.objects.get(code=code)
+        confirm =ConfirmString.objects.get(code=code)
     except:
         message = '无效的请求'
         return render(request, 'user_app/confirm.html', locals())
@@ -188,9 +183,3 @@ def checkcode(request):
         return HttpResponse('1')
     else:
         return HttpResponse('0')
-
-
-
-
-
-
